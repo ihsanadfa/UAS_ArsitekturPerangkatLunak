@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar Menu - Sistem Kantin Universitas</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .menu-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .menu-image {
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .price-tag {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .status-available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .singleton-info {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-shop"></i> Kantin Universitas
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/menu">
+                            <i class="bi bi-list-ul"></i> Menu
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${isMahasiswa}">
+                        <a class="nav-link" href="/keranjang">
+                            <i class="bi bi-cart"></i> Keranjang
+                            <span id="cart-count" class="badge bg-danger rounded-pill ms-1">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" th:if="${isStaf}">
+                        <a class="nav-link" href="/staf/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="navbar-nav">
+                    <span class="navbar-text me-3" th:if="${isLoggedIn}">
+                        <i class="bi bi-person-circle"></i> 
+                        <span th:text="${userName}"></span>
+                    </span>
+                    <a class="btn btn-outline-light btn-sm" th:href="${isLoggedIn ? '/logout' : '/'}">
+                        <i class="bi bi-box-arrow-right" th:if="${isLoggedIn}"></i>
+                        <i class="bi bi-house-door" th:unless="${isLoggedIn}"></i>
+                        <span th:text="${isLoggedIn ? 'Logout' : 'Home'}"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Messages -->
+    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+        <div class="container">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${param.error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="bg-white border-bottom">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-2">
+                        <i class="bi bi-menu-button-wide text-primary"></i> 
+                        Daftar Menu Kantin
+                    </h1>
+                    <p class="text-muted mb-0">
+                        <span th:text="${statistikMenu}">Statistik menu</span>
+                    </p>
+                </div>
+                
+                <!-- Singleton Pattern Info (for educational purpose) -->
+                <div class="col-md-6" th:if="${isStaf}">
+                    <div class="alert singleton-info mb-0 py-2">
+                        <small>
+                            <i class="bi bi-database-gear"></i> 
+                            <strong>Singleton Pattern:</strong><br>
+                            <span th:text="${singletonInfo}">Singleton info</span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="container py-3">
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-3">
+                        <form method="GET" action="/menu" class="row g-3 align-items-end">
+                            <!-- Search -->
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">
+                                    <i class="bi bi-search"></i> Cari Menu
+                                </label>
+                                <input type="text" class="form-control" name="search" 
+                                       th:value="${searchKeyword}" placeholder="Nama menu...">
+                            </div>
+                            
+                            <!-- Category Filter -->
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">
+                                    <i class="bi bi-tags"></i> Kategori
+                                </label>
+                                <select class="form-select" name="kategori">
+                                    <option value="">Semua Kategori</option>
+                                    <option th:each="kat : ${kategoriList}" 
+                                            th:value="${kat}" 
+                                            th:text="${kat}"
+                                            th:selected="${kat == selectedKategori}">
+                                        Kategori
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <!-- Show All (for staff) -->
+                            <div class="col-md-3" th:if="${isStaf}">
+                                <label class="form-label small fw-bold">
+                                    <i class="bi bi-eye"></i> Tampilkan
+                                </label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="showAll" 
+                                           th:checked="${showAll}" value="true">
+                                    <label class="form-check-label">Semua Menu</label>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="col-md-2">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-funnel"></i> Filter
+                                    </button>
+                                    <a href="/menu" class="btn btn-outline-secondary btn-sm">Reset</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="container pb-5">
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-grid-3x3-gap"></i> 
+                        Ditemukan <span class="badge bg-primary" th:text="${totalMenu}">0</span> menu
+                    </h5>
+                    
+                    <!-- Quick Actions -->
+                    <div class="btn-group" role="group">
+                        <a href="/menu/singleton-demo" th:if="${isStaf}" class="btn btn-outline-info btn-sm">
+                            <i class="bi bi-gear"></i> Singleton Demo
+                        </a>
+                        <a href="/pesanan/demo-patterns" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-tools"></i> Pattern Demo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- No Menu Found -->
+        <div th:if="${#lists.isEmpty(menuList)}" class="row">
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-emoji-frown text-muted" style="font-size: 3rem;"></i>
+                    <h4 class="text-muted mt-3">Tidak ada menu ditemukan</h4>
+                    <p class="text-muted">Coba ubah filter pencarian atau kembali ke semua menu.</p>
+                    <a href="/menu" class="btn btn-primary">
+                        <i class="bi bi-arrow-left"></i> Lihat Semua Menu
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menu Cards -->
+        <div class="row g-4" th:unless="${#lists.isEmpty(menuList)}">
+            <div class="col-md-6 col-lg-4" th:each="menu : ${menuList}">
+                <div class="card menu-card border-0 shadow-sm">
+                    <!-- Menu Image Placeholder -->
+                    <div class="menu-image">
+                        <i class="bi bi-cup-hot text-white" style="font-size: 3rem;"></i>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Menu Header -->
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-1" th:text="${menu.namaMenu}">Nama Menu</h5>
+                            <span class="badge rounded-pill" 
+                                  th:classappend="${menu.tersedia ? 'status-available' : 'status-unavailable'}">
+                                <i class="bi" th:classappend="${menu.tersedia ? 'bi-check-circle' : 'bi-x-circle'}"></i>
+                                <span th:text="${menu.tersedia ? 'Tersedia' : 'Habis'}">Status</span>
+                            </span>
+                        </div>
+                        
+                        <!-- Category & ID -->
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-tag"></i> <span th:text="${menu.kategori}">Kategori</span>
+                            <span class="ms-2 text-info">
+                                <i class="bi bi-hash"></i> <span th:text="${menu.id}">ID</span>
+                            </span>
+                        </p>
+                        
+                        <!-- Price -->
+                        <div class="price-tag text-primary mb-3">
+                            <i class="bi bi-currency-exchange"></i> 
+                            Rp <span th:text="${#numbers.formatDecimal(menu.harga, 0, 0)}">0</span>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2" th:if="${isMahasiswa}">
+                            <div th:if="${menu.tersedia}">
+                                <!-- Add to Cart Form -->
+                                <form action="/keranjang/add" method="POST" class="d-flex gap-2">
+                                    <input type="hidden" name="idMenu" th:value="${menu.id}">
+                                    <div class="input-group flex-grow-1">
+                                        <span class="input-group-text">Qty</span>
+                                        <input type="number" class="form-control" name="kuantitas" 
+                                               value="1" min="1" max="10" style="max-width: 80px;">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="bi bi-cart-plus"></i> Tambah
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div th:unless="${menu.tersedia}">
+                                <button class="btn btn-secondary w-100" disabled>
+                                    <i class="bi bi-x-circle"></i> Menu Sedang Habis
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Staff View -->
+                        <div th:if="${isStaf}" class="d-grid gap-2">
+                            <div class="btn-group" role="group">
+                                <!-- Toggle Status -->
+                                <form th:action="@{/staf/update-menu-status}" method="POST" class="d-inline">
+                                    <input type="hidden" name="idMenu" th:value="${menu.id}">
+                                    <input type="hidden" name="status" th:value="${!menu.tersedia}">
+                                    <button type="submit" class="btn btn-sm"
+                                            th:classappend="${menu.tersedia ? 'btn-warning' : 'btn-success'}">
+                                        <i class="bi" th:classappend="${menu.tersedia ? 'bi-pause-circle' : 'bi-play-circle'}"></i>
+                                        <span th:text="${menu.tersedia ? 'Set Habis' : 'Set Tersedia'}">Action</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Update Cart Counter -->
+    <script th:if="${isMahasiswa}">
+        function updateCartCount() {
+            fetch('/keranjang/count')
+                .then(response => response.text())
+                .then(count => {
+                    const badge = document.getElementById('cart-count');
+                    if (badge) {
+                        badge.textContent = count;
+                        badge.style.display = count > 0 ? 'inline' : 'none';
+                    }
+                })
+                .catch(error => console.log('Error updating cart count:', error));
+        }
+        
+        // Update cart count on page load
+        updateCartCount();
+        
+        // Update cart count after adding to cart
+        document.addEventListener('DOMContentLoaded', function() {
+            const forms = document.querySelectorAll('form[action="/keranjang/add"]');
+            forms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    setTimeout(updateCartCount, 500);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

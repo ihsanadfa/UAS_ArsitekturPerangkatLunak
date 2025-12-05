@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keranjang Belanja - Sistem Kantin Universitas</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .cart-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid #e9ecef;
+        }
+        .cart-item:hover {
+            background-color: #f8f9fa;
+            border-left-color: #0d6efd;
+        }
+        .price-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .decorator-option {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .decorator-option.selected {
+            border-color: #0d6efd;
+            background-color: #e7f3ff;
+        }
+        .decorator-preview {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+        }
+        .quantity-control {
+            border-radius: 20px;
+        }
+        .empty-cart {
+            color: #6c757d;
+        }
+        .checkout-sticky {
+            position: sticky;
+            top: 90px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-shop"></i> Kantin Universitas
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/menu">
+                            <i class="bi bi-list-ul"></i> Menu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/keranjang">
+                            <i class="bi bi-cart"></i> Keranjang
+                            <span class="badge bg-danger rounded-pill ms-1" th:text="${totalItems}">0</span>
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="navbar-nav">
+                    <span class="navbar-text me-3">
+                        <i class="bi bi-person-circle"></i> 
+                        <span th:text="${userName}"></span>
+                    </span>
+                    <a class="btn btn-outline-light btn-sm" href="/">
+                        <i class="bi bi-house-door"></i> Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+        <div class="container">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${param.success}">Success message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="bg-white border-bottom">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h3 mb-2">
+                        <i class="bi bi-cart3 text-primary"></i> 
+                        Keranjang Belanja
+                    </h1>
+                    <p class="text-muted mb-0">
+                        Kelola pesanan Anda sebelum checkout
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="/menu" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle"></i> Tambah Menu
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row">
+            <!-- Cart Items Section -->
+            <div class="col-lg-8">
+                <!-- Empty Cart -->
+                <div th:if="${#lists.isEmpty(itemKeranjangList)}" class="text-center empty-cart py-5">
+                    <i class="bi bi-cart-x" style="font-size: 4rem;"></i>
+                    <h4 class="mt-3">Keranjang Anda Kosong</h4>
+                    <p class="mb-4">Mulai tambahkan menu favorit Anda!</p>
+                    <a href="/menu" class="btn btn-primary">
+                        <i class="bi bi-arrow-right"></i> Lihat Menu
+                    </a>
+                </div>
+
+                <!-- Cart Items -->
+                <div th:unless="${#lists.isEmpty(itemKeranjangList)}">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-bag"></i> 
+                                Item dalam Keranjang (<span th:text="${totalItems}">0</span>)
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:each="item, iterStat : ${itemKeranjangList}" 
+                                 class="cart-item p-4" 
+                                 th:classappend="${!iterStat.last} ? 'border-bottom' : ''">
+                                
+                                <div class="row align-items-center">
+                                    <!-- Menu Info -->
+                                    <div class="col-md-5">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                                     style="width: 50px; height: 50px;">
+                                                    <i class="bi bi-cup-hot text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1" th:text="${item.menu.namaMenu}">Menu Name</h6>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-tag"></i> <span th:text="${item.menu.kategori}">Category</span>
+                                                </small>
+                                                <div class="mt-1">
+                                                    <span class="badge bg-light text-dark">
+                                                        Rp <span th:text="${#numbers.formatDecimal(item.menu.harga, 0, 0)}">0</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Quantity Controls -->
+                                    <div class="col-md-3">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <form action="/keranjang/update" method="POST" class="d-inline">
+                                                <input type="hidden" name="itemId" th:value="${item.id}">
+                                                <input type="hidden" name="action" value="decrease">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm quantity-control"
+                                                        th:disabled="${item.kuantitas <= 1}">
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                            </form>
+                                            
+                                            <span class="mx-3 fw-bold fs-5" th:text="${item.kuantitas}">1</span>
+                                            
+                                            <form action="/keranjang/update" method="POST" class="d-inline">
+                                                <input type="hidden" name="itemId" th:value="${item.id}">
+                                                <input type="hidden" name="action" value="increase">
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm quantity-control">
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Subtotal -->
+                                    <div class="col-md-3 text-center">
+                                        <div class="fw-bold fs-5 text-primary">
+                                            Rp <span th:text="${#numbers.formatDecimal(item.subtotal, 0, 0)}">0</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Actions -->
+                                    <div class="col-md-1 text-end">
+                                        <form action="/keranjang/remove" method="POST" class="d-inline">
+                                            <input type="hidden" name="itemId" th:value="${item.id}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="return confirm('Hapus item ini dari keranjang?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Checkout Summary Sidebar -->
+            <div class="col-lg-4" th:unless="${#lists.isEmpty(itemKeranjangList)}">
+                <div class="checkout-sticky">
+                    <!-- Order Summary -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header price-summary text-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-calculator"></i> Ringkasan Pesanan
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal (<span th:text="${totalItems}">0</span> item):</span>
+                                <span class="fw-bold">Rp <span th:text="${#numbers.formatDecimal(subtotalHarga, 0, 0)}">0</span></span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
+                                <span>Total:</span>
+                                <span>Rp <span th:text="${#numbers.formatDecimal(totalHarga, 0, 0)}">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Decorator Pattern Options -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-warning bg-opacity-10">
+                            <h6 class="mb-0">
+                                <i class="bi bi-plus-square"></i> 
+                                Opsi Tambahan 
+                                <small class="text-muted">(Decorator Pattern)</small>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <form id="decorator-form">
+                                <!-- Sambal Option -->
+                                <div class="decorator-option p-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="decorators" 
+                                               value="sambal" id="sambal">
+                                        <label class="form-check-label fw-bold" for="sambal">
+                                            <i class="bi bi-fire text-danger"></i> Tambah Sambal
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Level kepedasan ekstra untuk pesanan Anda</small>
+                                    <div class="mt-2">
+                                        <span class="badge bg-danger bg-opacity-25 text-danger">+ Rp 2,000</span>
+                                    </div>
+                                </div>
+
+                                <!-- Kemasan Khusus Option -->
+                                <div class="decorator-option p-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="decorators" 
+                                               value="kemasan" id="kemasan">
+                                        <label class="form-check-label fw-bold" for="kemasan">
+                                            <i class="bi bi-box-seam text-success"></i> Kemasan Premium
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Kemasan ramah lingkungan & aman</small>
+                                    <div class="mt-2">
+                                        <span class="badge bg-success bg-opacity-25 text-success">+ Rp 3,000</span>
+                                    </div>
+                                </div>
+
+                                <!-- Prioritas Option -->
+                                <div class="decorator-option p-3 mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="decorators" 
+                                               value="prioritas" id="prioritas">
+                                        <label class="form-check-label fw-bold" for="prioritas">
+                                            <i class="bi bi-lightning text-warning"></i> Prioritas Express
+                                        </label>
+                                    </div>
+                                    <small class="text-muted">Pesanan diproses lebih cepat</small>
+                                    <div class="mt-2">
+                                        <span class="badge bg-warning bg-opacity-25 text-warning">+ Rp 5,000</span>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <!-- Decorator Preview -->
+                            <div id="decorator-preview" class="decorator-preview p-3 mt-3" style="display: none;">
+                                <h6 class="text-primary">
+                                    <i class="bi bi-eye"></i> Preview Opsi:
+                                </h6>
+                                <div id="preview-content"></div>
+                                <hr>
+                                <div class="d-flex justify-content-between fw-bold">
+                                    <span>Total dengan opsi:</span>
+                                    <span class="text-primary" id="total-with-decorators">Rp 0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Actions -->
+                    <div class="d-grid gap-2">
+                        <form action="/pesanan/checkout" method="POST">
+                            <input type="hidden" name="selectedDecorators" id="selected-decorators" value="">
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="bi bi-credit-card"></i> 
+                                Proses Pesanan
+                            </button>
+                        </form>
+                        
+                        <form action="/keranjang/clear" method="POST">
+                            <button type="submit" class="btn btn-outline-danger w-100"
+                                    onclick="return confirm('Kosongkan seluruh keranjang?')">
+                                <i class="bi bi-trash"></i> Kosongkan Keranjang
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Pattern Info -->
+                    <div class="alert alert-info mt-3" role="alert">
+                        <small>
+                            <i class="bi bi-info-circle"></i> 
+                            <strong>Decorator Pattern Demo:</strong><br>
+                            Opsi tambahan menggunakan pattern Decorator untuk menambah fitur dinamis pada pesanan tanpa mengubah struktur dasar.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Decorator Pattern Interactive Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[name="decorators"]');
+            const preview = document.getElementById('decorator-preview');
+            const previewContent = document.getElementById('preview-content');
+            const totalWithDecorators = document.getElementById('total-with-decorators');
+            const selectedDecoratorsInput = document.getElementById('selected-decorators');
+            
+            const baseTotal = /*[[${totalHarga}]]*/ 0;
+            const decoratorPrices = {
+                'sambal': 2000,
+                'kemasan': 3000,
+                'prioritas': 5000
+            };
+            
+            const decoratorNames = {
+                'sambal': '🌶️ Sambal Ekstra',
+                'kemasan': '📦 Kemasan Premium', 
+                'prioritas': '⚡ Prioritas Express'
+            };
+
+            function updatePreview() {
+                const selected = Array.from(checkboxes).filter(cb => cb.checked);
+                
+                if (selected.length === 0) {
+                    preview.style.display = 'none';
+                    selectedDecoratorsInput.value = '';
+                    return;
+                }
+
+                // Show preview
+                preview.style.display = 'block';
+                
+                // Update content
+                let content = '';
+                let additionalCost = 0;
+                let decoratorValues = [];
+                
+                selected.forEach(checkbox => {
+                    const value = checkbox.value;
+                    const price = decoratorPrices[value];
+                    const name = decoratorNames[value];
+                    
+                    content += `<div class="d-flex justify-content-between mb-1">
+                        <small>${name}</small>
+                        <small class="fw-bold">+ Rp ${price.toLocaleString()}</small>
+                    </div>`;
+                    
+                    additionalCost += price;
+                    decoratorValues.push(value);
+                });
+                
+                previewContent.innerHTML = content;
+                
+                // Update total
+                const newTotal = baseTotal + additionalCost;
+                totalWithDecorators.textContent = `Rp ${newTotal.toLocaleString()}`;
+                
+                // Update hidden input
+                selectedDecoratorsInput.value = decoratorValues.join(',');
+                
+                // Add visual feedback
+                selected.forEach(checkbox => {
+                    checkbox.closest('.decorator-option').classList.add('selected');
+                });
+            }
+
+            // Add event listeners
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Remove selected class from all options first
+                    document.querySelectorAll('.decorator-option').forEach(option => {
+                        option.classList.remove('selected');
+                    });
+                    
+                    updatePreview();
+                });
+            });
+
+            // Initial update
+            updatePreview();
+        });
+    </script>
+</body>
+</html>

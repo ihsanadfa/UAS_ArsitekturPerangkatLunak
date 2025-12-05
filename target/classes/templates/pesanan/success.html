@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesanan Berhasil - Sistem Kantin Universitas</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .success-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            min-height: 40vh;
+            display: flex;
+            align-items: center;
+        }
+        .success-animation {
+            animation: bounce 1s infinite alternate;
+        }
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-10px); }
+        }
+        .order-details {
+            border-left: 4px solid #28a745;
+        }
+        .pattern-implementation {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+        }
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 8px;
+        }
+        .receipt-style {
+            font-family: 'Courier New', monospace;
+            background: white;
+            border: 2px dashed #6c757d;
+        }
+        .step-completed {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-shop"></i> Kantin Universitas
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text me-3">
+                    <i class="bi bi-person-circle"></i> 
+                    <span th:text="${userName}"></span>
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="/">
+                    <i class="bi bi-house-door"></i> Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Success Header -->
+    <div class="success-header">
+        <div class="container text-center">
+            <div class="success-animation">
+                <i class="bi bi-check-circle-fill" style="font-size: 6rem; margin-bottom: 1rem;"></i>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">Pesanan Berhasil!</h1>
+            <p class="fs-4 mb-4">Terima kasih atas pesanan Anda</p>
+            <div class="badge bg-light text-dark fs-6 px-3 py-2">
+                <i class="bi bi-receipt"></i> 
+                Order ID: <span class="fw-bold" th:text="${orderId}">#12345</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="bg-white border-bottom py-3">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill step-completed fs-4 me-2"></i>
+                            <span class="small">Pilih Menu</span>
+                        </div>
+                        <div class="flex-grow-1 d-flex align-items-center">
+                            <hr class="flex-grow-1 border-success">
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill step-completed fs-4 me-2"></i>
+                            <span class="small">Keranjang</span>
+                        </div>
+                        <div class="flex-grow-1 d-flex align-items-center">
+                            <hr class="flex-grow-1 border-success">
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill step-completed fs-4 me-2"></i>
+                            <span class="small">Konfirmasi</span>
+                        </div>
+                        <div class="flex-grow-1 d-flex align-items-center">
+                            <hr class="flex-grow-1 border-success">
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill step-completed fs-4 me-2"></i>
+                            <span class="small fw-bold">Selesai</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row">
+            <!-- Order Summary -->
+            <div class="col-lg-6">
+                <!-- Receipt Style Order Details -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-receipt"></i> Detail Pesanan
+                        </h5>
+                    </div>
+                    <div class="card-body receipt-style p-4">
+                        <div class="text-center mb-4">
+                            <h6 class="fw-bold">KANTIN UNIVERSITAS</h6>
+                            <p class="small mb-1">Jl. Pendidikan No. 123</p>
+                            <p class="small">Telp: (021) 123-4567</p>
+                            <hr style="border-style: dashed;">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <strong>Order ID:</strong><br>
+                                <span th:text="${orderId}">#12345</span>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Tanggal:</strong><br>
+                                <span th:text="${#temporals.format(orderDate, 'dd/MM/yyyy HH:mm')}">23/12/2024 14:30</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <strong>Customer:</strong> <span th:text="${userName}">Mahasiswa</span><br>
+                            <strong>Pembayaran:</strong> <span th:text="${paymentMethod}">TUNAI</span>
+                        </div>
+
+                        <hr style="border-style: dashed;">
+
+                        <!-- Order Items -->
+                        <div th:each="item : ${orderItems}" class="d-flex justify-content-between mb-2">
+                            <div class="flex-grow-1">
+                                <span th:text="${item.menu.namaMenu}">Menu Name</span><br>
+                                <small class="text-muted">
+                                    <span th:text="${item.kuantitas}">1</span>x @ Rp <span th:text="${#numbers.formatDecimal(item.menu.harga, 0, 0)}">0</span>
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                Rp <span th:text="${#numbers.formatDecimal(item.subtotal, 0, 0)}">0</span>
+                            </div>
+                        </div>
+
+                        <!-- Decorators -->
+                        <div th:if="${not #lists.isEmpty(appliedDecorators)}">
+                            <hr style="border-style: dashed;">
+                            <div class="text-muted">
+                                <strong>Opsi Tambahan:</strong>
+                            </div>
+                            <div th:each="decorator : ${appliedDecorators}" class="d-flex justify-content-between mb-1">
+                                <span th:switch="${decorator}">
+                                    <span th:case="'sambal'">🌶️ Sambal Ekstra</span>
+                                    <span th:case="'kemasan'">📦 Kemasan Premium</span>
+                                    <span th:case="'prioritas'">⚡ Prioritas Express</span>
+                                </span>
+                                <span th:switch="${decorator}">
+                                    <span th:case="'sambal'">Rp 2,000</span>
+                                    <span th:case="'kemasan'">Rp 3,000</span>
+                                    <span th:case="'prioritas'">Rp 5,000</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <hr style="border-style: dashed;">
+                        
+                        <div class="d-flex justify-content-between fs-5 fw-bold">
+                            <span>TOTAL:</span>
+                            <span>Rp <span th:text="${#numbers.formatDecimal(totalAmount, 0, 0)}">0</span></span>
+                        </div>
+
+                        <hr style="border-style: dashed;">
+                        <div class="text-center mt-3">
+                            <p class="small mb-0">Terima kasih atas kunjungan Anda!</p>
+                            <p class="small">Semoga makanan Anda lezat 😊</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Design Pattern Implementation Summary -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-gear-wide-connected"></i> 
+                            Design Pattern Implementation Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="pattern-implementation p-4">
+                            <!-- Singleton Pattern -->
+                            <div class="mb-4">
+                                <h6 class="text-primary">
+                                    <i class="bi bi-1-circle-fill"></i> Singleton Pattern
+                                </h6>
+                                <p class="small text-muted mb-2">MenuRepository menggunakan thread-safe Bill Pugh Singleton</p>
+                                <div class="code-block p-3">
+                                    <code class="small">
+                                        <span class="text-warning">public class</span> <span class="text-green">MenuRepository</span> {<br>
+                                        &nbsp;&nbsp;<span class="text-warning">private static class</span> <span class="text-green">SingletonHelper</span> {<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-warning">private static final</span> MenuRepository <span class="text-blue">INSTANCE</span> = <span class="text-warning">new</span> MenuRepository();<br>
+                                        &nbsp;&nbsp;}<br>
+                                        &nbsp;&nbsp;<span class="text-warning">public static</span> MenuRepository <span class="text-green">getInstance</span>() {<br>
+                                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-warning">return</span> SingletonHelper.INSTANCE;<br>
+                                        &nbsp;&nbsp;}<br>
+                                        }
+                                    </code>
+                                </div>
+                            </div>
+
+                            <!-- Decorator Pattern -->
+                            <div class="mb-4">
+                                <h6 class="text-warning">
+                                    <i class="bi bi-2-circle-fill"></i> Decorator Pattern
+                                </h6>
+                                <p class="small text-muted mb-2">Menambah fitur dinamis pada pesanan</p>
+                                <div class="code-block p-3">
+                                    <code class="small">
+                                        IPesanan pesanan = <span class="text-warning">new</span> <span class="text-green">Pesanan</span>(items);<br>
+                                        <div th:each="decorator : ${appliedDecorators}">
+                                            <span th:switch="${decorator}">
+                                                <span th:case="'sambal'">pesanan = <span class="text-warning">new</span> <span class="text-green">SambalDecorator</span>(pesanan);</span>
+                                                <span th:case="'kemasan'">pesanan = <span class="text-warning">new</span> <span class="text-green">KemasanKhususDecorator</span>(pesanan);</span>
+                                                <span th:case="'prioritas'">pesanan = <span class="text-warning">new</span> <span class="text-green">PrioritasDecorator</span>(pesanan);</span>
+                                            </span><br>
+                                        </div>
+                                    </code>
+                                </div>
+                            </div>
+
+                            <!-- Factory Pattern -->
+                            <div class="mb-4">
+                                <h6 class="text-success">
+                                    <i class="bi bi-3-circle-fill"></i> Factory Method Pattern
+                                </h6>
+                                <p class="small text-muted mb-2">Pembuatan objek pembayaran berdasarkan tipe</p>
+                                <div class="code-block p-3">
+                                    <code class="small">
+                                        Pembayaran payment = PembayaranFactory<br>
+                                        &nbsp;&nbsp;.<span class="text-green">createPembayaran</span>(TipePembayaran.<span class="text-blue" th:text="${paymentMethod}">TUNAI</span>);<br><br>
+                                        <span class="text-muted">// Returns appropriate implementation:</span><br>
+                                        <span th:switch="${paymentMethod}">
+                                            <span th:case="'TUNAI'">// TunaiPembayaran instance</span>
+                                            <span th:case="'TRANSFER'">// TransferPembayaran instance</span>
+                                            <span th:case="'E_WALLET'">// EWalletPembayaran instance</span>
+                                        </span>
+                                    </code>
+                                </div>
+                            </div>
+
+                            <!-- Integration Summary -->
+                            <div class="alert alert-success" role="alert">
+                                <h6 class="alert-heading">
+                                    <i class="bi bi-check-circle"></i> Pattern Integration Success!
+                                </h6>
+                                <p class="mb-0 small">
+                                    Ketiga Design Pattern berhasil diintegrasikan dalam satu alur bisnis yang realistis, 
+                                    mendemonstrasikan penggunaan pattern dalam aplikasi enterprise yang sesungguhnya.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Actions -->
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="bi bi-signpost-2"></i> Langkah Selanjutnya
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="/menu" class="btn btn-primary">
+                                <i class="bi bi-arrow-repeat"></i> Pesan Lagi
+                            </a>
+                            
+                            <a href="/pesanan/demo-patterns" class="btn btn-outline-info">
+                                <i class="bi bi-tools"></i> Lihat Pattern Demo
+                            </a>
+                            
+                            <a href="/staf/dashboard" th:if="${isStaf}" class="btn btn-outline-secondary">
+                                <i class="bi bi-speedometer2"></i> Dashboard Staf
+                            </a>
+                            
+                            <a href="/" class="btn btn-outline-dark">
+                                <i class="bi bi-house"></i> Kembali ke Home
+                            </a>
+                        </div>
+
+                        <!-- Order Status Info -->
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <h6 class="text-primary">
+                                <i class="bi bi-info-circle"></i> Status Pesanan:
+                            </h6>
+                            <div class="progress mb-2" style="height: 25px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%">
+                                    Pesanan Diterima ✓
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-0">
+                                <i class="bi bi-clock"></i> 
+                                Estimasi waktu persiapan: 
+                                <span class="fw-bold" th:if="${#lists.contains(appliedDecorators, 'prioritas')}">10-15 menit</span>
+                                <span class="fw-bold" th:unless="${#lists.contains(appliedDecorators, 'prioritas')}">15-20 menit</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Success Animation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add some celebration effects
+            setTimeout(function() {
+                // You could add confetti or other celebration effects here
+                console.log('🎉 Order completed successfully with all Design Patterns!');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
