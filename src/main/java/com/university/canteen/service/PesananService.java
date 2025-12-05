@@ -185,12 +185,22 @@ public class PesananService {
         System.out.println("Order ID Generated: " + idPesanan);
         
         // ===== CREATE FINAL PESANAN INFO =====
+        // Normalize opsiTambahan to uppercase for consistent display
+        List<String> normalizedOpsiTambahan = new ArrayList<>();
+        if (opsiTambahan != null && !opsiTambahan.isEmpty()) {
+            for (String opsi : opsiTambahan) {
+                if (opsi != null && !opsi.trim().isEmpty()) {
+                    normalizedOpsiTambahan.add(opsi.trim().toUpperCase());
+                }
+            }
+        }
+        
         PesananInfo pesananInfo = new PesananInfo(
             idPesanan,
             idPengguna,
             nomorAntrean,
             daftarItemPesanan,
-            opsiTambahan != null ? opsiTambahan : new ArrayList<>(),
+            normalizedOpsiTambahan,
             hargaDasar,
             hargaFinal,
             deskripsiFinal,
@@ -230,7 +240,7 @@ public class PesananService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
             String tanggal = LocalDateTime.now().format(formatter);
             
-            // Format: Q-YYYYMMDD-XXX (XXX = counter)
+            // Format: Q-YYYYMMDD-### (### = counter)
             int counter = nomorAntreanTerpakai.size() + 1 + attempt;
             nomorAntrean = String.format("Q-%s-%03d", tanggal, counter);
             

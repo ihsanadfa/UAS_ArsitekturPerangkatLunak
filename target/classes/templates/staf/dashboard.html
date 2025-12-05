@@ -318,18 +318,21 @@
                                     
                                     <div class="col-md-4">
                                         <div class="small">
-                                            <strong>Items:</strong> <span th:text="${#lists.size(order.daftarItem)}">3</span> menu<br>
-                                            <strong>Decorators:</strong>
-                                            <div th:if="${not #lists.isEmpty(order.opsiTambahan)}" class="d-inline">
-                                                <span th:each="decorator, iterStat : ${order.opsiTambahan}">
-                                                    <span th:switch="${decorator}">
-                                                        <span th:case="'sambal'">🌶️</span>
-                                                        <span th:case="'kemasan'">📦</span>
-                                                        <span th:case="'prioritas'">⚡</span>
-                                                    </span><span th:unless="${iterStat.last}">, </span>
-                                                </span>
+                                            <strong>Items:</strong>
+                                            <div th:if="${not #lists.isEmpty(order.daftarItem)}" class="mb-2">
+                                                <div th:each="item : ${order.daftarItem}" class="text-primary">
+                                                    • <span th:text="${item.namaMenu}">Menu Name</span> x<span th:text="${item.kuantitas}">1</span>
+                                                </div>
                                             </div>
-                                            <span th:if="${#lists.isEmpty(order.opsiTambahan)}" class="text-muted">Tidak ada</span>
+                                            <div th:if="${#lists.isEmpty(order.daftarItem)}" class="text-muted mb-2">
+                                                No items found
+                                            </div>
+                                            
+                                            <strong>Decorators:</strong>
+                                            <span th:if="${#lists.isEmpty(order.opsiTambahan)}">Tidak ada</span>
+                                            <span th:unless="${#lists.isEmpty(order.opsiTambahan)}">
+                                                <span th:each="dec : ${order.opsiTambahan}" th:text="${dec} + ' '"></span>
+                                            </span>
                                         </div>
                                     </div>
                                     

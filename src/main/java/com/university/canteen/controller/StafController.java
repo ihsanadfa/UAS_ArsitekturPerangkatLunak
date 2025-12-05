@@ -406,8 +406,8 @@ public class StafController {
         }
         
         try {
-            // Dummy report generation
-            String reportContent = generateDummyReport();
+            // Dummy report generation - content generated but not used for download yet
+            generateDummyReport();
             
             // For now, just show success message
             // In real implementation, this could return ResponseEntity<byte[]> for file download

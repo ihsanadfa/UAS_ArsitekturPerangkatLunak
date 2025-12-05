@@ -255,7 +255,10 @@
                     </div>
                     <div class="card-body">
                         <form id="payment-form" action="/pesanan/submit" method="POST">
-                            <input type="hidden" name="opsiTambahan" th:value="${#strings.listJoin(selectedDecorators, ',')}">
+                            <!-- Brute force approach: Use th:block to ensure proper hidden inputs -->
+                            <th:block th:each="opt : ${selectedDecorators}">
+                                <input type="hidden" name="opsiTambahan" th:value="${opt}" />
+                            </th:block>
                             <input type="hidden" name="tipePembayaran" id="selectedPaymentType" value="">
                             
                             <div class="row g-3">

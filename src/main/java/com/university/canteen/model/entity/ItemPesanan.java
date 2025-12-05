@@ -1,6 +1,5 @@
 package com.university.canteen.model.entity;
 
-import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

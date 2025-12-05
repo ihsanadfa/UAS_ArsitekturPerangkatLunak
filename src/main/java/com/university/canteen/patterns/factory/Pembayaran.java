@@ -31,7 +31,7 @@ public abstract class Pembayaran {
     
     /** 
      * Identifier unik untuk setiap transaksi pembayaran.
-     * Format: PAY-YYYYMMDD-HHMMSS-XXX (XXX = counter)
+     * Format: PAY-YYYYMMDD-HHMMSS-### (### = counter)
      */
     protected String idPembayaran;
     
@@ -83,7 +83,7 @@ public abstract class Pembayaran {
     
     /**
      * Method untuk generate ID pembayaran yang unik.
-     * Format: PAY-YYYYMMDD-HHMMSS-XXX
+     * Format: PAY-YYYYMMDD-HHMMSS-###
      * 
      * @return string ID pembayaran yang unik
      */

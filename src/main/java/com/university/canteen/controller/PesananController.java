@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -134,6 +135,13 @@ public class PesananController {
                                @RequestParam("tipePembayaran") String tipePembayaran,
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
+        
+        // DEBUG: Print received opsiTambahan
+        System.out.println("Received Opsi: " + opsiTambahan);
+        if (opsiTambahan == null) {
+            opsiTambahan = new ArrayList<>();
+            System.out.println("OpsiTambahan was null, initialized to empty list");
+        }
         
         // Validasi login
         if (!HomeController.isMahasiswa(session)) {

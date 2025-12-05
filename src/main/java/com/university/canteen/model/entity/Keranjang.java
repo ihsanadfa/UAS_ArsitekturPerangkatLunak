@@ -37,7 +37,7 @@ public class Keranjang {
     
     /** 
      * ID unik untuk keranjang.
-     * Format: CART-YYYYMMDD-HHMMSS-XXX
+     * Format: CART-YYYYMMDD-HHMMSS-###
      */
     @Id
     @Column(name = "id", length = 50)
