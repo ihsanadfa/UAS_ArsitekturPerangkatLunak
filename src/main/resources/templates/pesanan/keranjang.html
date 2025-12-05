@@ -158,7 +158,9 @@
                                                 </div>
                                             </div>
                                             <div>
-                                                <h6 class="mb-1" th:text="${item.menu.namaMenu}">Menu Name</h6>
+                                                <h6 class="mb-1" th:text="${item.menu.namaMenu}" 
+                                                    th:data-base-price="${item.menu.harga}"
+                                                    th:data-quantity="${item.kuantitas}">Menu Name</h6>
                                                 <small class="text-muted">
                                                     <i class="bi bi-tag"></i> <span th:text="${item.menu.kategori}">Category</span>
                                                 </small>
@@ -175,8 +177,8 @@
                                     <div class="col-md-3">
                                         <div class="d-flex align-items-center justify-content-center">
                                             <form action="/keranjang/update" method="POST" class="d-inline">
-                                                <input type="hidden" name="itemId" th:value="${item.id}">
-                                                <input type="hidden" name="action" value="decrease">
+                                                <input type="hidden" name="idMenu" th:value="${item.menu.id}">
+                                                <input type="hidden" name="kuantitas" th:value="${item.kuantitas - 1}">
                                                 <button type="submit" class="btn btn-outline-secondary btn-sm quantity-control"
                                                         th:disabled="${item.kuantitas <= 1}">
                                                     <i class="bi bi-dash"></i>
@@ -186,8 +188,8 @@
                                             <span class="mx-3 fw-bold fs-5" th:text="${item.kuantitas}">1</span>
                                             
                                             <form action="/keranjang/update" method="POST" class="d-inline">
-                                                <input type="hidden" name="itemId" th:value="${item.id}">
-                                                <input type="hidden" name="action" value="increase">
+                                                <input type="hidden" name="idMenu" th:value="${item.menu.id}">
+                                                <input type="hidden" name="kuantitas" th:value="${item.kuantitas + 1}">
                                                 <button type="submit" class="btn btn-outline-secondary btn-sm quantity-control">
                                                     <i class="bi bi-plus"></i>
                                                 </button>
@@ -205,7 +207,7 @@
                                     <!-- Actions -->
                                     <div class="col-md-1 text-end">
                                         <form action="/keranjang/remove" method="POST" class="d-inline">
-                                            <input type="hidden" name="itemId" th:value="${item.id}">
+                                            <input type="hidden" name="idMenu" th:value="${item.menu.id}">
                                             <button type="submit" class="btn btn-outline-danger btn-sm" 
                                                     onclick="return confirm('Hapus item ini dari keranjang?')">
                                                 <i class="bi bi-trash"></i>
@@ -316,7 +318,7 @@
 
                     <!-- Checkout Actions -->
                     <div class="d-grid gap-2">
-                        <form action="/pesanan/checkout" method="POST">
+                        <form action="/pesanan/konfirmasi" method="GET">
                             <input type="hidden" name="selectedDecorators" id="selected-decorators" value="">
                             <button type="submit" class="btn btn-success btn-lg w-100">
                                 <i class="bi bi-credit-card"></i> 
@@ -357,7 +359,7 @@
             const totalWithDecorators = document.getElementById('total-with-decorators');
             const selectedDecoratorsInput = document.getElementById('selected-decorators');
             
-            const baseTotal = /*[[${totalHarga}]]*/ 0;
+            const baseTotal = parseFloat(/*[[${totalHarga}]]*/ 0) || 0;
             const decoratorPrices = {
                 'sambal': 2000,
                 'kemasan': 3000,
@@ -382,6 +384,15 @@
                 // Show preview
                 preview.style.display = 'block';
                 
+                // Calculate proper base total from all cart items
+                let calculatedBaseTotal = 0;
+                const cartItems = document.querySelectorAll('[data-base-price]');
+                cartItems.forEach(item => {
+                    const basePrice = parseFloat(item.getAttribute('data-base-price')) || 0;
+                    const quantity = parseFloat(item.getAttribute('data-quantity')) || 0;
+                    calculatedBaseTotal += (basePrice * quantity);
+                });
+                
                 // Update content
                 let content = '';
                 let additionalCost = 0;
@@ -403,8 +414,8 @@
                 
                 previewContent.innerHTML = content;
                 
-                // Update total
-                const newTotal = baseTotal + additionalCost;
+                // Update total using calculated base total
+                const newTotal = calculatedBaseTotal + additionalCost;
                 totalWithDecorators.textContent = `Rp ${newTotal.toLocaleString()}`;
                 
                 // Update hidden input

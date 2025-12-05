@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Design Patterns - Sistem Kantin Universitas</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <style>
+        .pattern-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            height: 100%;
+        }
+        .pattern-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        .pattern-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .decorator-demo {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        }
+        .singleton-demo {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        .factory-demo {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+        }
+        .code-snippet {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            font-family: 'Courier New', monospace;
+        }
+        .pattern-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-shop"></i> Kantin Universitas
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door"></i> Home
+                        </a>
+                    </li>
+                    <li th:if="${session.userType == 'MAHASISWA'}" class="nav-item">
+                        <a class="nav-link" href="/menu">
+                            <i class="bi bi-list-ul"></i> Menu
+                        </a>
+                    </li>
+                    <li th:if="${session.userType == 'MAHASISWA'}" class="nav-item">
+                        <a class="nav-link" href="/keranjang">
+                            <i class="bi bi-cart"></i> Keranjang
+                        </a>
+                    </li>
+                    <li th:if="${session.userType == 'STAF'}" class="nav-item">
+                        <a class="nav-link" href="/staf/dashboard">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/pesanan/demo-patterns">
+                            <i class="bi bi-gear-fill"></i> Demo Patterns
+                        </a>
+                    </li>
+                </ul>
+                
+                <div class="navbar-nav">
+                    <span class="navbar-text me-3">
+                        <i class="bi bi-person-circle"></i> 
+                        <span th:text="${session.userName}">User</span>
+                    </span>
+                    <a class="btn btn-outline-light btn-sm" href="/logout">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <div class="pattern-header text-center py-5">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="bi bi-gear-wide-connected"></i> 
+                Design Patterns Demo
+            </h1>
+            <p class="lead">
+                Implementasi 3 Design Patterns dalam Sistem Kantin Universitas
+            </p>
+            <p class="mb-0">
+                <span class="badge bg-light text-dark me-2">UAS Arsitektur Perangkat Lunak</span>
+                <span class="badge bg-light text-dark">M. Ihsan Rizqullah Adfa - 2208107010029</span>
+            </p>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <!-- Pattern Overview -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-body text-center p-4">
+                        <h3 class="mb-3">
+                            <i class="bi bi-lightbulb text-warning"></i> 
+                            Pattern Implementation Overview
+                        </h3>
+                        <p class="text-muted mb-0">
+                            Sistem ini mengimplementasikan 3 Design Patterns utama untuk menciptakan 
+                            arsitektur yang scalable, maintainable, dan robust sesuai dengan prinsip-prinsip 
+                            Software Architecture.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pattern Cards -->
+        <div class="row g-4">
+            <!-- Decorator Pattern -->
+            <div class="col-lg-4">
+                <div class="card pattern-card h-100">
+                    <div class="decorator-demo text-center p-4">
+                        <i class="bi bi-layers-fill pattern-icon text-dark"></i>
+                        <h3 class="fw-bold">Decorator Pattern</h3>
+                        <p class="mb-0 text-dark">Dynamic Order Enhancement</p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-plus-square text-warning"></i> 
+                            Implementasi
+                        </h5>
+                        <p class="card-text">
+                            Pattern ini memungkinkan penambahan fungsionalitas tambahan pada pesanan 
+                            tanpa mengubah struktur dasar objek Menu.
+                        </p>
+                        
+                        <h6 class="mt-3">
+                            <i class="bi bi-gear"></i> Fitur Decorator:
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Tambah Sambal (+Rp 2.000)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Kemasan Khusus (+Rp 3.000)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Prioritas (+Rp 5.000)</li>
+                        </ul>
+                        
+                        <div class="code-snippet p-3 rounded mt-3">
+                            <small>
+                                <strong>File:</strong> decorator/PesananDecorator.java<br>
+                                <strong>Pattern:</strong> Concrete Decorator Implementation
+                            </small>
+                        </div>
+                        
+                        <h6 class="mt-3">
+                            <i class="bi bi-star"></i> Keuntungan:
+                        </h6>
+                        <ul class="small">
+                            <li>Flexibility untuk menambah opsi baru</li>
+                            <li>Tidak mengubah kode existing Menu</li>
+                            <li>Kombinasi decorator yang dinamis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Singleton Pattern -->
+            <div class="col-lg-4">
+                <div class="card pattern-card h-100">
+                    <div class="singleton-demo text-center p-4">
+                        <i class="bi bi-database-fill pattern-icon text-dark"></i>
+                        <h3 class="fw-bold">Singleton Pattern</h3>
+                        <p class="mb-0 text-dark">Centralized Data Management</p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-shield-check text-info"></i> 
+                            Implementasi
+                        </h5>
+                        <p class="card-text">
+                            MenuRepository menggunakan Bill Pugh Singleton Pattern untuk memastikan 
+                            hanya ada satu instance yang mengelola data menu.
+                        </p>
+                        
+                        <h6 class="mt-3">
+                            <i class="bi bi-gear"></i> Karakteristik:
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Thread-Safe Implementation</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Lazy Initialization</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Memory Efficient</li>
+                        </ul>
+                        
+                        <div class="code-snippet p-3 rounded mt-3">
+                            <small>
+                                <strong>File:</strong> repository/MenuRepository.java<br>
+                                <strong>Pattern:</strong> Bill Pugh Singleton
+                            </small>
+                        </div>
+                        
+                        <h6 class="mt-3">
+                            <i class="bi bi-star"></i> Keuntungan:
+                        </h6>
+                        <ul class="small">
+                            <li>Konsistensi data di seluruh aplikasi</li>
+                            <li>Kontrol akses terpusat ke data menu</li>
+                            <li>Efficient memory usage</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Factory Method Pattern -->
+            <div class="col-lg-4">
+                <div class="card pattern-card h-100">
+                    <div class="factory-demo text-center p-4">
+                        <i class="bi bi-credit-card-fill pattern-icon text-dark"></i>
+                        <h3 class="fw-bold">Factory Pattern</h3>
+                        <p class="mb-0 text-dark">Payment Object Creation</p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-tools text-primary"></i> 
+                            Implementasi
+                        </h5>
+                        <p class="card-text">
+                            Factory Method Pattern digunakan untuk menciptakan objek pembayaran 
+                            berdasarkan tipe yang dipilih pengguna.
+                        </p>
+                        
+                        <h6 class="mt-3">
+                            <i class="bi bi-gear"></i> Payment Types:
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success"></i> Tunai (Kasir)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> QRIS (Digital)</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Transfer Bank</li>
+                        </ul>
+                        
+                        <div class="code-snippet p-3 rounded mt-3">
+                            <small>
+                                <strong>File:</strong> factory/PembayaranFactory.java<br>
+                                <strong>Pattern:</strong> Factory Method Implementation
+                            </small>
+                        </div>
+                        
+                        <h6 class="mt-3">
+                            <i class="bi bi-star"></i> Keuntungan:
+                        </h6>
+                        <ul class="small">
+                            <li>Extensibility untuk payment baru</li>
+                            <li>Loose coupling antara client dan concrete classes</li>
+                            <li>Centralized object creation logic</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Implementation Summary -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="bi bi-clipboard-check"></i> 
+                            Implementation Summary
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>
+                                    <i class="bi bi-check-all text-success"></i> 
+                                    Requirements Fulfilled
+                                </h5>
+                                <ul>
+                                    <li><strong>R01:</strong> Tampilkan menu dengan harga ✅</li>
+                                    <li><strong>R02:</strong> Tambah item ke keranjang ✅</li>
+                                    <li><strong>R03:</strong> Generate nomor antrean ✅</li>
+                                    <li><strong>R04:</strong> Update status menu (staf) ✅</li>
+                                    <li><strong>R05:</strong> Lihat daftar pesanan (staf) ✅</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>
+                                    <i class="bi bi-code-square text-info"></i> 
+                                    OCL Integration
+                                </h5>
+                                <ul>
+                                    <li>Pre/Post Conditions validation ✅</li>
+                                    <li>Invariant constraints checking ✅</li>
+                                    <li>Business rule enforcement ✅</li>
+                                    <li>Exception handling with OCL ✅</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Stack -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-body">
+                        <h5 class="text-center mb-4">
+                            <i class="bi bi-stack text-primary"></i> 
+                            Technical Stack
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <i class="bi bi-cup-hot" style="font-size: 2rem; color: #6f4e37;"></i>
+                                    <h6 class="mt-2">Java Spring Boot</h6>
+                                    <small class="text-muted">Backend Framework</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <i class="bi bi-file-earmark-code" style="font-size: 2rem; color: #0d6efd;"></i>
+                                    <h6 class="mt-2">Thymeleaf</h6>
+                                    <small class="text-muted">Template Engine</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <i class="bi bi-database" style="font-size: 2rem; color: #198754;"></i>
+                                    <h6 class="mt-2">H2 Database</h6>
+                                    <small class="text-muted">In-Memory DB</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3">
+                                    <i class="bi bi-bootstrap" style="font-size: 2rem; color: #7952b3;"></i>
+                                    <h6 class="mt-2">Bootstrap 5</h6>
+                                    <small class="text-muted">Frontend Framework</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="mb-0">
+                        <i class="bi bi-mortarboard-fill"></i> 
+                        <strong>UAS Arsitektur Perangkat Lunak</strong><br>
+                        <small>Implementasi Design Patterns dalam Sistem Kantin Universitas</small>
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">
+                        <strong>M. Ihsan Rizqullah Adfa</strong><br>
+                        <small>2208107010029 - Program Studi Informatika</small><br>
+                        <small>Universitas Syiah Kuala - 2025</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

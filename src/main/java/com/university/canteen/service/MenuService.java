@@ -219,6 +219,47 @@ public class MenuService {
     }
     
     /**
+     * *** SINGLETON PATTERN USAGE ***
+     * Method untuk menambah menu baru ke sistem.
+     * Menggunakan Singleton MenuRepository untuk menyimpan data.
+     * 
+     * @param namaMenu nama menu baru
+     * @param kategori kategori menu
+     * @param harga harga menu
+     * @param deskripsi deskripsi menu
+     * @return true jika berhasil menambahkan, false jika gagal
+     */
+    public boolean tambahMenu(String namaMenu, String kategori, double harga, String deskripsi) {
+        try {
+            // Generate ID baru
+            String newId = "MNU" + String.format("%03d", getAllMenu().size() + 1);
+            
+            // Cek apakah menu sudah ada
+            boolean menuExists = getAllMenu().stream()
+                                           .anyMatch(menu -> menu.getNamaMenu().equalsIgnoreCase(namaMenu.trim()));
+            
+            if (menuExists) {
+                return false; // Menu sudah ada
+            }
+            
+            // Buat menu baru
+            Menu menuBaru = new Menu();
+            menuBaru.setId(newId);
+            menuBaru.setNamaMenu(namaMenu.trim());
+            menuBaru.setKategori(kategori.trim());
+            menuBaru.setHarga(harga);
+            menuBaru.setDeskripsi(deskripsi.trim());
+            menuBaru.setTersedia(true); // Menu baru default tersedia
+            
+            // Tambah ke repository menggunakan Singleton Pattern
+            return MenuRepository.getInstance().tambahMenu(menuBaru);
+            
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
      * *** SINGLETON PATTERN DEMONSTRATION ***
      * Method untuk menunjukkan bahwa instance repository selalu sama.
      * Berguna untuk debugging dan memastikan Singleton bekerja dengan benar.

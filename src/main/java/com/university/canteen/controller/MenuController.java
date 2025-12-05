@@ -144,6 +144,13 @@ public class MenuController {
             return "redirect:/menu?error=access-denied";
         }
         
+        // *** SINGLETON PATTERN - Get repository instance for demonstration ***
+        com.university.canteen.patterns.singleton.MenuRepository repository = com.university.canteen.patterns.singleton.MenuRepository.getInstance();
+        
+        // Get instance hash and total menus
+        String instanceHash = String.valueOf(repository.hashCode());
+        int totalMenus = repository.getTotalMenu();
+        
         // *** SINGLETON PATTERN - Multiple calls should return same instance ***
         String singletonInfo1 = menuService.getSingletonInfo();
         String singletonInfo2 = menuService.getSingletonInfo();
@@ -152,6 +159,9 @@ public class MenuController {
         // Demonstrate that MenuRepository is always the same instance
         boolean isSameInstance = singletonInfo1.equals(singletonInfo2) && singletonInfo2.equals(singletonInfo3);
         
+        model.addAttribute("repository", repository);
+        model.addAttribute("instanceHash", instanceHash);
+        model.addAttribute("totalMenus", totalMenus);
         model.addAttribute("singletonInfo1", singletonInfo1);
         model.addAttribute("singletonInfo2", singletonInfo2);
         model.addAttribute("singletonInfo3", singletonInfo3);

@@ -254,8 +254,9 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <form id="payment-form" action="/pesanan/process" method="POST">
-                            <input type="hidden" name="decorators" th:value="${#strings.listJoin(selectedDecorators, ',')}">
+                        <form id="payment-form" action="/pesanan/submit" method="POST">
+                            <input type="hidden" name="opsiTambahan" th:value="${#strings.listJoin(selectedDecorators, ',')}">
+                            <input type="hidden" name="tipePembayaran" id="selectedPaymentType" value="">
                             
                             <div class="row g-3">
                                 <!-- Tunai -->
@@ -264,7 +265,7 @@
                                         <i class="bi bi-cash-coin text-success mb-2" style="font-size: 2rem;"></i>
                                         <h6>Tunai</h6>
                                         <small class="text-muted">Bayar langsung di kasir</small>
-                                        <input type="radio" name="metodePembayaran" value="TUNAI" class="d-none">
+
                                     </div>
                                 </div>
 
@@ -274,17 +275,16 @@
                                         <i class="bi bi-bank text-primary mb-2" style="font-size: 2rem;"></i>
                                         <h6>Transfer Bank</h6>
                                         <small class="text-muted">Transfer ke rekening kantin</small>
-                                        <input type="radio" name="metodePembayaran" value="TRANSFER" class="d-none">
+
                                     </div>
                                 </div>
 
-                                <!-- E-Wallet -->
+                                <!-- QRIS -->
                                 <div class="col-md-4">
-                                    <div class="payment-method p-3 rounded text-center" data-payment="E_WALLET">
-                                        <i class="bi bi-phone text-warning mb-2" style="font-size: 2rem;"></i>
-                                        <h6>E-Wallet</h6>
-                                        <small class="text-muted">OVO, GoPay, Dana, dll</small>
-                                        <input type="radio" name="metodePembayaran" value="E_WALLET" class="d-none">
+                                    <div class="payment-method p-3 rounded text-center" data-payment="QRIS">
+                                        <i class="bi bi-qr-code-scan text-warning mb-2" style="font-size: 2rem;"></i>
+                                        <h6>QRIS</h6>
+                                        <small class="text-muted">Scan QR untuk bayar</small>
                                     </div>
                                 </div>
                             </div>
@@ -374,6 +374,8 @@
             const confirmButton = document.getElementById('confirm-order');
             const selectedType = document.getElementById('selected-type');
 
+            const selectedPaymentTypeInput = document.getElementById('selectedPaymentType');
+
             paymentMethods.forEach(method => {
                 method.addEventListener('click', function() {
                     // Remove selected class from all methods
@@ -382,32 +384,39 @@
                     // Add selected class to clicked method
                     this.classList.add('selected');
                     
-                    // Check the hidden radio button
-                    const radio = this.querySelector('input[type="radio"]');
-                    radio.checked = true;
+                    // Get payment type from data attribute
+                    const paymentType = this.dataset.payment;
+                    
+                    // Update hidden input with selected payment type
+                    selectedPaymentTypeInput.value = paymentType;
                     
                     // Update factory pattern display
-                    const paymentType = this.dataset.payment;
                     selectedType.textContent = paymentType;
                     
                     // Enable confirm button
                     confirmButton.disabled = false;
+                    
+                    console.log('Payment method selected:', paymentType);
                 });
             });
 
             // Form validation
             document.getElementById('payment-form').addEventListener('submit', function(e) {
-                const selectedPayment = document.querySelector('input[name="metodePembayaran"]:checked');
+                const selectedPaymentType = selectedPaymentTypeInput.value;
                 
-                if (!selectedPayment) {
+                if (!selectedPaymentType || selectedPaymentType === '') {
                     e.preventDefault();
                     alert('Silakan pilih metode pembayaran terlebih dahulu!');
                     return false;
                 }
                 
+                console.log('Submitting form with payment type:', selectedPaymentType);
+                
                 // Show loading state
                 confirmButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
                 confirmButton.disabled = true;
+                
+                return true;
             });
         });
     </script>

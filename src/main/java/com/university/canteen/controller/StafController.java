@@ -180,7 +180,7 @@ public class StafController {
             redirectAttributes.addFlashAttribute("error", "System error: " + e.getMessage());
         }
         
-        return "redirect:/staf/manage-menu";
+        return "redirect:/staf/dashboard";
     }
     
     /**
@@ -336,5 +336,123 @@ public class StafController {
             model.addAttribute("error", "Error generating analysis: " + e.getMessage());
             return "staf/patterns-analysis";
         }
+    }
+    
+    /**
+     * Handler untuk menambahkan menu baru dari dashboard.
+     * 
+     * @param namaMenu nama menu baru
+     * @param kategori kategori menu
+     * @param harga harga menu
+     * @param deskripsi deskripsi menu
+     * @param session HttpSession untuk validation
+     * @param redirectAttributes untuk flash messages
+     * @return redirect ke dashboard
+     */
+    @PostMapping("/add-menu")
+    public String addMenu(@RequestParam("namaMenu") String namaMenu,
+                         @RequestParam("kategori") String kategori,
+                         @RequestParam("harga") double harga,
+                         @RequestParam(value = "deskripsi", defaultValue = "") String deskripsi,
+                         HttpSession session,
+                         RedirectAttributes redirectAttributes) {
+        
+        if (!HomeController.isStaf(session)) {
+            redirectAttributes.addFlashAttribute("error", "Access denied");
+            return "redirect:/";
+        }
+        
+        try {
+            // Validasi input
+            if (namaMenu == null || namaMenu.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Nama menu tidak boleh kosong!");
+                return "redirect:/staf/dashboard";
+            }
+            
+            if (harga <= 0) {
+                redirectAttributes.addFlashAttribute("error", "Harga menu harus lebih dari 0!");
+                return "redirect:/staf/dashboard";
+            }
+            
+            // Tambah menu via MenuService (Singleton Pattern)
+            boolean berhasil = menuService.tambahMenu(namaMenu, kategori, harga, deskripsi);
+            
+            if (berhasil) {
+                redirectAttributes.addFlashAttribute("success", 
+                    String.format("Menu '%s' berhasil ditambahkan dengan harga Rp%.0f", namaMenu, harga));
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Gagal menambahkan menu. Menu mungkin sudah ada.");
+            }
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "System error: " + e.getMessage());
+        }
+        
+        return "redirect:/staf/dashboard";
+    }
+    
+    /**
+     * Handler untuk export report (dummy implementation).
+     * 
+     * @param session HttpSession untuk validation
+     * @param redirectAttributes untuk flash messages
+     * @return redirect ke dashboard dengan pesan
+     */
+    @GetMapping("/export-report")
+    public String exportReport(HttpSession session, RedirectAttributes redirectAttributes) {
+        if (!HomeController.isStaf(session)) {
+            redirectAttributes.addFlashAttribute("error", "Access denied");
+            return "redirect:/";
+        }
+        
+        try {
+            // Dummy report generation
+            String reportContent = generateDummyReport();
+            
+            // For now, just show success message
+            // In real implementation, this could return ResponseEntity<byte[]> for file download
+            redirectAttributes.addFlashAttribute("success", 
+                "Report berhasil di-generate! Feature download akan segera tersedia.");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error generating report: " + e.getMessage());
+        }
+        
+        return "redirect:/staf/dashboard";
+    }
+    
+    /**
+     * Helper method untuk generate dummy report content.
+     */
+    private String generateDummyReport() {
+        StringBuilder report = new StringBuilder();
+        report.append("=== LAPORAN PENJUALAN KANTIN UNIVERSITAS ===\n");
+        report.append("Tanggal: ").append(java.time.LocalDate.now()).append("\n\n");
+        
+        try {
+            List<PesananService.PesananInfo> allOrders = pesananService.getAllPesanan();
+            List<Menu> allMenu = menuService.getAllMenu();
+            
+            report.append("STATISTIK UMUM:\n");
+            report.append("- Total Menu: ").append(allMenu.size()).append("\n");
+            report.append("- Total Pesanan: ").append(allOrders.size()).append("\n");
+            
+            double totalPendapatan = allOrders.stream()
+                                            .mapToDouble(PesananService.PesananInfo::getHargaFinal)
+                                            .sum();
+            report.append("- Total Pendapatan: Rp").append(String.format("%.0f", totalPendapatan)).append("\n\n");
+            
+            report.append("DESIGN PATTERNS USAGE:\n");
+            report.append("- Singleton Pattern: MenuRepository instance active\n");
+            report.append("- Decorator Pattern: Order customizations available\n");
+            report.append("- Factory Method: Payment processing implemented\n\n");
+            
+            report.append("=== END OF REPORT ===");
+            
+        } catch (Exception e) {
+            report.append("Error generating detailed report: ").append(e.getMessage());
+        }
+        
+        return report.toString();
     }
 }

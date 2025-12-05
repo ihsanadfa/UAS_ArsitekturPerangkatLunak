@@ -76,23 +76,23 @@ public class MenuRepository {
      */
     private void initializeData() {
         // Kategori Makanan Utama
-        menuList.add(new Menu("M001", "Nasi Gudeg", 15000.0, "Makanan Utama", true));
-        menuList.add(new Menu("M002", "Ayam Geprek", 18000.0, "Makanan Utama", true));
-        menuList.add(new Menu("M003", "Gado-gado", 12000.0, "Makanan Utama", true));
-        menuList.add(new Menu("M004", "Nasi Goreng Spesial", 16000.0, "Makanan Utama", true));
-        menuList.add(new Menu("M005", "Mie Ayam", 13000.0, "Makanan Utama", false)); // habis
+        menuList.add(new Menu("M001", "Nasi Gudeg", 15000.0, "Makanan Utama", "Nasi gudeg khas Yogyakarta lengkap dengan ayam, krecek, dan sambal kacang", true));
+        menuList.add(new Menu("M002", "Ayam Geprek", 18000.0, "Makanan Utama", "Ayam goreng geprek dengan sambal pedas dan lalapan segar", true));
+        menuList.add(new Menu("M003", "Gado-gado", 12000.0, "Makanan Utama", "Salad Indonesia dengan sayuran segar dan bumbu kacang spesial", true));
+        menuList.add(new Menu("M004", "Nasi Goreng Spesial", 16000.0, "Makanan Utama", "Nasi goreng dengan telur, ayam suwir, dan kerupuk", true));
+        menuList.add(new Menu("M005", "Mie Ayam", 13000.0, "Makanan Utama", "Mie kuning dengan potongan ayam, pangsit, dan kuah kaldu", false)); // habis
         
         // Kategori Minuman
-        menuList.add(new Menu("D001", "Es Teh Manis", 4000.0, "Minuman", true));
-        menuList.add(new Menu("D002", "Es Jeruk", 6000.0, "Minuman", true));
-        menuList.add(new Menu("D003", "Kopi Hitam", 5000.0, "Minuman", true));
-        menuList.add(new Menu("D004", "Jus Alpukat", 8000.0, "Minuman", true));
-        menuList.add(new Menu("D005", "Es Cendol", 7000.0, "Minuman", false)); // habis
+        menuList.add(new Menu("D001", "Es Teh Manis", 4000.0, "Minuman", "Teh manis dingin penyegar dahaga", true));
+        menuList.add(new Menu("D002", "Es Jeruk", 6000.0, "Minuman", "Jus jeruk segar dengan es batu dan sedikit gula", true));
+        menuList.add(new Menu("D003", "Kopi Hitam", 5000.0, "Minuman", "Kopi robusta hitam pahit untuk penambah energi", true));
+        menuList.add(new Menu("D004", "Jus Alpukat", 8000.0, "Minuman", "Jus alpukat kental dengan susu kental manis", true));
+        menuList.add(new Menu("D005", "Es Cendol", 7000.0, "Minuman", "Minuman tradisional dengan cendol, santan, dan gula merah", false)); // habis
         
         // Kategori Cemilan
-        menuList.add(new Menu("S001", "Pisang Goreng", 8000.0, "Cemilan", true));
-        menuList.add(new Menu("S002", "Tahu Isi", 6000.0, "Cemilan", true));
-        menuList.add(new Menu("S003", "Bakwan Jagung", 5000.0, "Cemilan", true));
+        menuList.add(new Menu("S001", "Pisang Goreng", 8000.0, "Cemilan", "Pisang kepok goreng krispi dengan taburan gula halus", true));
+        menuList.add(new Menu("S002", "Tahu Isi", 6000.0, "Cemilan", "Tahu goreng isi sayuran dan bumbu dengan sambal kecap", true));
+        menuList.add(new Menu("S003", "Bakwan Jagung", 5000.0, "Cemilan", "Bakwan jagung manis goreng renyah dengan cabai rawit", true));
     }
     
     /**
@@ -202,6 +202,31 @@ public class MenuRepository {
         return menuList.stream()
                       .filter(Menu::isTersedia)
                       .count();
+    }
+    
+    /**
+     * Menambah menu baru ke dalam repository.
+     * 
+     * @param menu menu baru yang akan ditambahkan
+     * @return true jika berhasil menambahkan, false jika gagal atau menu sudah ada
+     */
+    public boolean tambahMenu(Menu menu) {
+        if (menu == null || menu.getNamaMenu() == null || menu.getNamaMenu().trim().isEmpty()) {
+            return false;
+        }
+        
+        // Cek apakah menu dengan nama yang sama sudah ada
+        boolean menuExists = menuList.stream()
+                                    .anyMatch(existingMenu -> 
+                                        existingMenu.getNamaMenu().equalsIgnoreCase(menu.getNamaMenu()));
+        
+        if (menuExists) {
+            return false; // Menu sudah ada
+        }
+        
+        // Tambahkan menu baru
+        menuList.add(menu);
+        return true;
     }
     
     /**

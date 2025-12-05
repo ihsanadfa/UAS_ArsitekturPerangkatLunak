@@ -59,6 +59,13 @@ public class Menu {
     private String kategori;
     
     /** 
+     * Deskripsi detail menu.
+     * Berisi informasi tambahan tentang menu seperti bahan-bahan atau karakteristik khusus.
+     */
+    @Column(name = "deskripsi", length = 255)
+    private String deskripsi;
+    
+    /** 
      * Status ketersediaan menu.
      * true = tersedia untuk dipesan
      * false = habis/tidak tersedia

@@ -88,6 +88,9 @@ public class PesananController {
             model.addAttribute("keranjang", keranjang);
             model.addAttribute("daftarItem", keranjang.getDaftarItem());
             model.addAttribute("totalHargaDasar", totalHargaDasar);
+            model.addAttribute("subtotalMenu", totalHargaDasar);
+            model.addAttribute("decoratorCost", 0.0); // Default no decorators
+            model.addAttribute("totalAmount", totalHargaDasar); // Default total
             model.addAttribute("userName", userName);
             model.addAttribute("userId", userId);
             
@@ -166,7 +169,7 @@ public class PesananController {
             redirectAttributes.addFlashAttribute("pesananInfo", pesananInfo);
             redirectAttributes.addFlashAttribute("success", "Pesanan berhasil dibuat!");
             
-            return "redirect:/pesanan/success";
+            return "redirect:/pesanan/sukses";
             
         } catch (IllegalArgumentException e) {
             System.out.println("=== ORDER CREATION FAILED: Input Error ===");
@@ -197,8 +200,8 @@ public class PesananController {
      * @param session HttpSession untuk user validation
      * @return view name untuk pesanan/success.html
      */
-    @GetMapping("/success")
-    public String pesananSuccess(Model model, HttpSession session) {
+    @GetMapping("/sukses")
+    public String pesananSukses(Model model, HttpSession session) {
         // Validasi login
         if (!HomeController.isMahasiswa(session)) {
             return "redirect:/?error=access-denied";
@@ -211,6 +214,12 @@ public class PesananController {
         // Akan otomatis tersedia di model dengan key "pesananInfo"
         
         return "pesanan/success";
+    }
+
+    @GetMapping("/success")
+    public String pesananSuccess(Model model, HttpSession session) {
+        // Redirect to sukses for consistency
+        return "redirect:/pesanan/sukses";
     }
     
     /**

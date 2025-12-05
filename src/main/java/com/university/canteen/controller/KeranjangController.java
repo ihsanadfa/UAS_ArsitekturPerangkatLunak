@@ -63,9 +63,12 @@ public class KeranjangController {
             
             // Pass data to view
             model.addAttribute("keranjang", keranjang);
-            model.addAttribute("daftarItem", keranjang.getDaftarItem());
+            model.addAttribute("itemKeranjangList", keranjang.getDaftarItem());
+            model.addAttribute("daftarItem", keranjang.getDaftarItem()); // Keep for backward compatibility
             model.addAttribute("totalHarga", totalHarga);
+            model.addAttribute("subtotalHarga", totalHarga); // Add subtotalHarga for template
             model.addAttribute("jumlahItem", jumlahItem);
+            model.addAttribute("totalItems", jumlahItem); // Add missing totalItems for navbar badge
             model.addAttribute("isEmpty", isEmpty);
             model.addAttribute("ringkasan", ringkasan);
             model.addAttribute("userName", userName);

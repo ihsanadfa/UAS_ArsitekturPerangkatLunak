@@ -37,10 +37,12 @@ public class HomeController {
         // Cek apakah user sudah login
         String userType = (String) session.getAttribute("userType");
         String userId = (String) session.getAttribute("userId");
+        String userName = (String) session.getAttribute("userName");
         
         model.addAttribute("isLoggedIn", userType != null);
         model.addAttribute("userType", userType);
         model.addAttribute("userId", userId);
+        model.addAttribute("userName", userName);
         
         return "index";
     }

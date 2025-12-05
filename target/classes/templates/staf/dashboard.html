@@ -285,11 +285,11 @@
                             <i class="bi bi-list-check text-success"></i> 
                             Pesanan Terbaru (Requirement R05)
                         </h5>
-                        <a href="/staf/orders?all=true" class="btn btn-outline-success btn-sm">
+                        <a href="#ordersSection" class="btn btn-outline-success btn-sm">
                             <i class="bi bi-arrow-right"></i> Lihat Semua
                         </a>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" id="ordersSection">
                         <div th:if="${#lists.isEmpty(recentOrders)}">
                             <div class="text-center py-4 text-muted">
                                 <i class="bi bi-inbox" style="font-size: 3rem;"></i>
@@ -304,24 +304,24 @@
                                     <div class="col-md-3">
                                         <h6 class="mb-1">
                                             <i class="bi bi-receipt"></i> 
-                                            <span th:text="${order.id}">ORD-001</span>
+                                            <span th:text="${order.idPesanan}">ORD-001</span>
                                         </h6>
-                                        <small class="text-muted" th:text="${order.customerName}">Mahasiswa A</small>
+                                        <small class="text-muted" th:text="${order.idPengguna}">Mahasiswa A</small>
                                     </div>
                                     
                                     <div class="col-md-3">
                                         <span class="fw-bold text-primary">
-                                            Rp <span th:text="${#numbers.formatDecimal(order.total, 0, 0)}">25000</span>
+                                            Rp <span th:text="${#numbers.formatDecimal(order.hargaFinal, 0, 0)}">25000</span>
                                         </span><br>
-                                        <small class="text-muted" th:text="${order.paymentMethod}">TUNAI</small>
+                                        <small class="text-muted" th:text="${order.pembayaran.tipePembayaran.displayName}">TUNAI</small>
                                     </div>
                                     
                                     <div class="col-md-4">
                                         <div class="small">
-                                            <strong>Items:</strong> <span th:text="${order.itemCount}">3</span> menu<br>
+                                            <strong>Items:</strong> <span th:text="${#lists.size(order.daftarItem)}">3</span> menu<br>
                                             <strong>Decorators:</strong>
-                                            <div th:if="${not #lists.isEmpty(order.decorators)}" class="d-inline">
-                                                <span th:each="decorator, iterStat : ${order.decorators}">
+                                            <div th:if="${not #lists.isEmpty(order.opsiTambahan)}" class="d-inline">
+                                                <span th:each="decorator, iterStat : ${order.opsiTambahan}">
                                                     <span th:switch="${decorator}">
                                                         <span th:case="'sambal'">🌶️</span>
                                                         <span th:case="'kemasan'">📦</span>
@@ -329,12 +329,12 @@
                                                     </span><span th:unless="${iterStat.last}">, </span>
                                                 </span>
                                             </div>
-                                            <span th:if="${#lists.isEmpty(order.decorators)}" class="text-muted">Tidak ada</span>
+                                            <span th:if="${#lists.isEmpty(order.opsiTambahan)}" class="text-muted">Tidak ada</span>
                                         </div>
                                     </div>
                                     
                                     <div class="col-md-2 text-end">
-                                        <small class="text-muted" th:text="${#temporals.format(order.orderTime, 'HH:mm')}">14:30</small>
+                                        <small class="text-muted" th:text="${#temporals.format(order.waktuPesanan, 'HH:mm')}">14:30</small>
                                     </div>
                                 </div>
                             </div>

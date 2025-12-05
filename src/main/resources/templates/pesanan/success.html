@@ -75,9 +75,16 @@
             </div>
             <h1 class="display-4 fw-bold mb-3">Pesanan Berhasil!</h1>
             <p class="fs-4 mb-4">Terima kasih atas pesanan Anda</p>
+            
+            <!-- HUGE QUEUE NUMBER DISPLAY -->
+            <div class="display-1 fw-bold mb-3" style="font-size: 5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
+                🎫 <span th:text="${pesananInfo?.nomorAntrean}">001</span>
+            </div>
+            <p class="fs-5 mb-3">Nomor Antrean Anda</p>
+            
             <div class="badge bg-light text-dark fs-6 px-3 py-2">
                 <i class="bi bi-receipt"></i> 
-                Order ID: <span class="fw-bold" th:text="${orderId}">#12345</span>
+                Order ID: <span class="fw-bold" th:text="${pesananInfo?.idPesanan}">#12345</span>
             </div>
         </div>
     </div>
@@ -141,27 +148,37 @@
                         <div class="row mb-3">
                             <div class="col-6">
                                 <strong>Order ID:</strong><br>
-                                <span th:text="${orderId}">#12345</span>
+                                <span th:text="${pesananInfo?.idPesanan}">#12345</span>
                             </div>
                             <div class="col-6 text-end">
                                 <strong>Tanggal:</strong><br>
-                                <span th:text="${#temporals.format(orderDate, 'dd/MM/yyyy HH:mm')}">23/12/2024 14:30</span>
+                                <span th:text="${#temporals.format(pesananInfo?.waktuPesanan, 'dd/MM/yyyy HH:mm')}">23/12/2024 14:30</span>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <strong>Customer:</strong><br>
+                                <span th:text="${userName}">Mahasiswa</span>
+                            </div>
+                            <div class="col-6 text-end">
+                                <strong>Nomor Antrean:</strong><br>
+                                <span class="fw-bold fs-4 text-primary" th:text="${pesananInfo?.nomorAntrean}">001</span>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <strong>Customer:</strong> <span th:text="${userName}">Mahasiswa</span><br>
-                            <strong>Pembayaran:</strong> <span th:text="${paymentMethod}">TUNAI</span>
+                            <strong>Pembayaran:</strong> <span th:text="${pesananInfo?.pembayaran?.tipePembayaran?.displayName}">TUNAI</span>
                         </div>
 
                         <hr style="border-style: dashed;">
 
                         <!-- Order Items -->
-                        <div th:each="item : ${orderItems}" class="d-flex justify-content-between mb-2">
+                        <div th:each="item : ${pesananInfo?.daftarItem}" class="d-flex justify-content-between mb-2">
                             <div class="flex-grow-1">
-                                <span th:text="${item.menu.namaMenu}">Menu Name</span><br>
+                                <span th:text="${item.namaMenu}">Menu Name</span><br>
                                 <small class="text-muted">
-                                    <span th:text="${item.kuantitas}">1</span>x @ Rp <span th:text="${#numbers.formatDecimal(item.menu.harga, 0, 0)}">0</span>
+                                    <span th:text="${item.kuantitas}">1</span>x @ Rp <span th:text="${#numbers.formatDecimal(item.hargaSatuan, 0, 0)}">0</span>
                                 </small>
                             </div>
                             <div class="text-end">
@@ -170,12 +187,12 @@
                         </div>
 
                         <!-- Decorators -->
-                        <div th:if="${not #lists.isEmpty(appliedDecorators)}">
+                        <div th:if="${pesananInfo?.opsiTambahan != null and not #lists.isEmpty(pesananInfo.opsiTambahan)}">
                             <hr style="border-style: dashed;">
                             <div class="text-muted">
                                 <strong>Opsi Tambahan:</strong>
                             </div>
-                            <div th:each="decorator : ${appliedDecorators}" class="d-flex justify-content-between mb-1">
+                            <div th:each="decorator : ${pesananInfo.opsiTambahan}" class="d-flex justify-content-between mb-1">
                                 <span th:switch="${decorator}">
                                     <span th:case="'sambal'">🌶️ Sambal Ekstra</span>
                                     <span th:case="'kemasan'">📦 Kemasan Premium</span>
@@ -191,15 +208,78 @@
 
                         <hr style="border-style: dashed;">
                         
-                        <div class="d-flex justify-content-between fs-5 fw-bold">
-                            <span>TOTAL:</span>
-                            <span>Rp <span th:text="${#numbers.formatDecimal(totalAmount, 0, 0)}">0</span></span>
+                        <div class="d-flex justify-content-between fs-4 fw-bold text-primary">
+                            <span>💰 TOTAL BAYAR:</span>
+                            <span>Rp <span th:text="${#numbers.formatDecimal(pesananInfo?.hargaFinal, 0, 0)}">0</span></span>
                         </div>
 
                         <hr style="border-style: dashed;">
                         <div class="text-center mt-3">
                             <p class="small mb-0">Terima kasih atas kunjungan Anda!</p>
                             <p class="small">Semoga makanan Anda lezat 😊</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Instructions -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-credit-card"></i> Instruksi Pembayaran
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- TUNAI Payment Instructions -->
+                        <div th:if="${pesananInfo?.pembayaran?.tipePembayaran?.name() == 'TUNAI'}" class="text-center">
+                            <i class="bi bi-cash-coin" style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;"></i>
+                            <h5 class="text-success">Pembayaran Tunai</h5>
+                            <p class="mb-3">Silakan bayar di kasir dengan menunjukkan nomor antrean Anda</p>
+                            <div class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Langkah:</strong> Tunjukkan nomor antrean <strong th:text="${pesananInfo?.nomorAntrean}">001</strong> kepada petugas kasir
+                            </div>
+                        </div>
+
+                        <!-- QRIS Payment Instructions -->
+                        <div th:if="${pesananInfo?.pembayaran?.tipePembayaran?.name() == 'QRIS'}" class="text-center">
+                            <i class="bi bi-qr-code-scan" style="font-size: 3rem; color: #0d6efd; margin-bottom: 1rem;"></i>
+                            <h5 class="text-primary">Pembayaran QRIS</h5>
+                            <p class="mb-3">Scan QR Code di bawah ini untuk melakukan pembayaran</p>
+                            
+                            <!-- Dummy QR Code -->
+                            <div class="d-flex justify-content-center mb-3">
+                                <div class="border border-2 border-primary p-4 bg-white" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                                    <div class="text-center">
+                                        <i class="bi bi-qr-code" style="font-size: 4rem; color: #0d6efd;"></i>
+                                        <br><small class="text-muted">QR Code</small>
+                                        <br><small th:text="'Rp ' + ${#numbers.formatDecimal(pesananInfo?.hargaFinal, 0, 0)}">Rp 0</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Total:</strong> Rp <span th:text="${#numbers.formatDecimal(pesananInfo?.hargaFinal, 0, 0)}">0</span>
+                            </div>
+                        </div>
+
+                        <!-- TRANSFER Payment Instructions -->
+                        <div th:if="${pesananInfo?.pembayaran?.tipePembayaran?.name() == 'TRANSFER'}" class="text-center">
+                            <i class="bi bi-bank" style="font-size: 3rem; color: #dc3545; margin-bottom: 1rem;"></i>
+                            <h5 class="text-danger">Transfer Bank</h5>
+                            <p class="mb-3">Transfer ke rekening berikut dan konfirmasi pembayaran</p>
+                            
+                            <div class="alert alert-warning" role="alert">
+                                <h6><i class="bi bi-bank"></i> Bank BCA</h6>
+                                <p class="mb-1"><strong>No. Rekening:</strong> 1234567890</p>
+                                <p class="mb-1"><strong>Atas Nama:</strong> Kantin Universitas</p>
+                                <p class="mb-0"><strong>Jumlah Transfer:</strong> Rp <span th:text="${#numbers.formatDecimal(pesananInfo?.hargaFinal, 0, 0)}">0</span></p>
+                            </div>
+                            
+                            <div class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle"></i>
+                                Setelah transfer, tunjukkan bukti pembayaran dan nomor antrean <strong th:text="${pesananInfo?.nomorAntrean}">001</strong> kepada petugas
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,7 +325,7 @@
                                 <div class="code-block p-3">
                                     <code class="small">
                                         IPesanan pesanan = <span class="text-warning">new</span> <span class="text-green">Pesanan</span>(items);<br>
-                                        <div th:each="decorator : ${appliedDecorators}">
+                                        <div th:each="decorator : ${pesananInfo?.opsiTambahan}">
                                             <span th:switch="${decorator}">
                                                 <span th:case="'sambal'">pesanan = <span class="text-warning">new</span> <span class="text-green">SambalDecorator</span>(pesanan);</span>
                                                 <span th:case="'kemasan'">pesanan = <span class="text-warning">new</span> <span class="text-green">KemasanKhususDecorator</span>(pesanan);</span>
@@ -265,12 +345,12 @@
                                 <div class="code-block p-3">
                                     <code class="small">
                                         Pembayaran payment = PembayaranFactory<br>
-                                        &nbsp;&nbsp;.<span class="text-green">createPembayaran</span>(TipePembayaran.<span class="text-blue" th:text="${paymentMethod}">TUNAI</span>);<br><br>
+                                        &nbsp;&nbsp;.<span class="text-green">createPembayaran</span>(TipePembayaran.<span class="text-blue" th:text="${pesananInfo?.pembayaran?.tipePembayaran}">TUNAI</span>);<br><br>
                                         <span class="text-muted">// Returns appropriate implementation:</span><br>
-                                        <span th:switch="${paymentMethod}">
+                                        <span th:switch="${pesananInfo?.pembayaran?.tipePembayaran?.name()}">
                                             <span th:case="'TUNAI'">// TunaiPembayaran instance</span>
                                             <span th:case="'TRANSFER'">// TransferPembayaran instance</span>
-                                            <span th:case="'E_WALLET'">// EWalletPembayaran instance</span>
+                                            <span th:case="'QRIS'">// QRISPembayaran instance</span>
                                         </span>
                                     </code>
                                 </div>
@@ -329,8 +409,8 @@
                             <p class="small text-muted mb-0">
                                 <i class="bi bi-clock"></i> 
                                 Estimasi waktu persiapan: 
-                                <span class="fw-bold" th:if="${#lists.contains(appliedDecorators, 'prioritas')}">10-15 menit</span>
-                                <span class="fw-bold" th:unless="${#lists.contains(appliedDecorators, 'prioritas')}">15-20 menit</span>
+                                <span class="fw-bold" th:if="${pesananInfo?.opsiTambahan != null and #lists.contains(pesananInfo.opsiTambahan, 'prioritas')}">10-15 menit</span>
+                                <span class="fw-bold" th:unless="${pesananInfo?.opsiTambahan != null and #lists.contains(pesananInfo.opsiTambahan, 'prioritas')}">15-20 menit</span>
                             </p>
                         </div>
                     </div>
