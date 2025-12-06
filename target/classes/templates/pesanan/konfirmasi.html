@@ -254,12 +254,10 @@
                         </h6>
                     </div>
                     <div class="card-body">
-                        <form id="payment-form" action="/pesanan/submit" method="POST">
-                            <!-- Brute force approach: Use th:block to ensure proper hidden inputs -->
-                            <th:block th:each="opt : ${selectedDecorators}">
-                                <input type="hidden" name="opsiTambahan" th:value="${opt}" />
-                            </th:block>
-                            <input type="hidden" name="tipePembayaran" id="selectedPaymentType" value="">
+                        <form id="payment-form" action="/pesanan/submit" method="POST" th:object="${pesananForm}">
+                            <!-- SERVER-SIDE PREFILLING: Use prefilled value from controller -->
+                            <input type="hidden" name="opsiTambahanStr" th:value="${prefilledOpsiString}" id="opsiTambahanStr">
+                            <input type="hidden" name="tipePembayaran" id="selectedPaymentType">
                             
                             <div class="row g-3">
                                 <!-- Tunai -->
@@ -373,6 +371,12 @@
     <!-- Payment Selection Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DTO SYNC: Sync selectedDecorators with DTO checkboxes
+            const selectedDecorators = /*[[${selectedDecorators}]]*/ [];
+            console.log('Selected decorators from model:', selectedDecorators);
+            
+            // SERVER-SIDE PREFILLING: Decorator string is already set in hidden input via th:value
+            
             const paymentMethods = document.querySelectorAll('.payment-method');
             const confirmButton = document.getElementById('confirm-order');
             const selectedType = document.getElementById('selected-type');
@@ -403,7 +407,7 @@
                 });
             });
 
-            // Form validation
+            // Form validation - SERVER-SIDE PREFILLING eliminates need for updateDecoratorString
             document.getElementById('payment-form').addEventListener('submit', function(e) {
                 const selectedPaymentType = selectedPaymentTypeInput.value;
                 
@@ -414,6 +418,7 @@
                 }
                 
                 console.log('Submitting form with payment type:', selectedPaymentType);
+                console.log('Server-prefilled opsiTambahanStr:', document.getElementById('opsiTambahanStr').value);
                 
                 // Show loading state
                 confirmButton.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';

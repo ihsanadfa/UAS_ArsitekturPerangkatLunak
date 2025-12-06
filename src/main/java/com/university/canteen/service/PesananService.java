@@ -208,6 +208,9 @@ public class PesananService {
             LocalDateTime.now()
         );
         
+        // DEBUG: Verify PesananInfo was created correctly
+        System.out.println("=== VERIFICATION: PesananInfo.getOpsiTambahan(): " + pesananInfo.getOpsiTambahan());
+        
         // Simpan pesanan ke storage
         pesananMap.put(idPesanan, pesananInfo);
         
@@ -383,7 +386,16 @@ public class PesananService {
             this.idPengguna = idPengguna;
             this.nomorAntrean = nomorAntrean;
             this.daftarItem = daftarItem;
-            this.opsiTambahan = opsiTambahan;
+            
+            // CRITICAL FIX: Create defensive copy to avoid reference issues
+            if (opsiTambahan != null) {
+                this.opsiTambahan = new ArrayList<>(opsiTambahan);
+                System.out.println("=== PESANAN INFO: Stored opsiTambahan: " + this.opsiTambahan);
+            } else {
+                this.opsiTambahan = new ArrayList<>();
+                System.out.println("=== PESANAN INFO: opsiTambahan was null, created empty list");
+            }
+            
             this.hargaDasar = hargaDasar;
             this.hargaFinal = hargaFinal;
             this.deskripsiLengkap = deskripsiLengkap;
@@ -408,5 +420,19 @@ public class PesananService {
                                idPesanan, nomorAntrean, hargaFinal, 
                                pembayaran.getTipePembayaran().getDisplayName());
         }
+        
+        // Add getter for deskripsi as alias for deskripsiLengkap (used by debug)
+        public String getDeskripsi() { return deskripsiLengkap; }
+        
+        // Add getter for waktuPesan as alias for waktuPesanan (used by debug)
+        public LocalDateTime getWaktuPesan() { return waktuPesanan; }
+    }
+    
+    /**
+     * Get all orders for debugging purposes
+     * @return Map of all stored orders
+     */
+    public Map<String, PesananInfo> getSemuaPesanan() {
+        return new HashMap<>(pesananMap); // Return defensive copy
     }
 }

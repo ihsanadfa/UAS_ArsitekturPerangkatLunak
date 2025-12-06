@@ -88,6 +88,13 @@ public class StafController {
                                                                      .sorted((a, b) -> b.getWaktuPesanan().compareTo(a.getWaktuPesanan()))
                                                                      .limit(10)
                                                                      .toList();
+            
+            // DEBUG: Log what opsiTambahan data is being sent to view
+            System.out.println("=== STAF DASHBOARD: Recent orders count: " + recentOrders.size());
+            for (PesananService.PesananInfo order : recentOrders) {
+                System.out.println("Order " + order.getIdPesanan() + " opsiTambahan: " + order.getOpsiTambahan());
+            }
+            
             model.addAttribute("recentOrders", recentOrders);
             
             return "staf/dashboard";

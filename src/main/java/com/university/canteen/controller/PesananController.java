@@ -1,5 +1,6 @@
 package com.university.canteen.controller;
 
+import com.university.canteen.dto.PesananForm;
 import com.university.canteen.model.entity.Keranjang;
 import com.university.canteen.service.KeranjangService;
 import com.university.canteen.service.PesananService;
@@ -52,7 +53,8 @@ public class PesananController {
      * @return view name untuk pesanan/konfirmasi.html
      */
     @GetMapping("/konfirmasi")
-    public String konfirmasiPesanan(Model model, HttpSession session) {
+    public String konfirmasiPesanan(@RequestParam(value = "selectedDecorators", required = false) String selectedDecorators,
+                                   Model model, HttpSession session) {
         // Validasi login sebagai mahasiswa
         if (!HomeController.isMahasiswa(session)) {
             return "redirect:/?error=access-denied";
@@ -60,6 +62,26 @@ public class PesananController {
         
         String userId = HomeController.getUserId(session);
         String userName = HomeController.getUserName(session);
+        
+        // *** SERVER-SIDE PREFILLING: Process decorator parameter ***
+        String prefilledOpsiString = "";
+        List<String> selectedDecoratorsList = new ArrayList<>();
+        
+        if (selectedDecorators != null && !selectedDecorators.trim().isEmpty()) {
+            // Split comma-separated decorators from URL parameter
+            String[] decoratorArray = selectedDecorators.split(",");
+            for (String decorator : decoratorArray) {
+                String trimmed = decorator.trim().toUpperCase();
+                if (!trimmed.isEmpty()) {
+                    selectedDecoratorsList.add(trimmed);
+                }
+            }
+            prefilledOpsiString = String.join(",", selectedDecoratorsList);
+        }
+        
+        System.out.println("KONFIRMASI GET: Received selectedDecorators='" + selectedDecorators + "'");
+        System.out.println("KONFIRMASI GET: Processed prefilledOpsiString='" + prefilledOpsiString + "'");
+        System.out.println("KONFIRMASI GET: selectedDecoratorsList=" + selectedDecoratorsList);
         
         try {
             // Validasi keranjang tidak kosong
@@ -94,6 +116,10 @@ public class PesananController {
             model.addAttribute("totalAmount", totalHargaDasar); // Default total
             model.addAttribute("userName", userName);
             model.addAttribute("userId", userId);
+            
+            // *** SERVER-SIDE PREFILLING: Add processed decorator data ***
+            model.addAttribute("prefilledOpsiString", prefilledOpsiString);
+            model.addAttribute("selectedDecorators", selectedDecoratorsList);
             
             // Decorator Pattern Preview
             model.addAttribute("hargaDenganSambal", hargaDenganSambal);
@@ -131,17 +157,27 @@ public class PesananController {
      * @return redirect ke success page atau kembali ke konfirmasi jika error
      */
     @PostMapping("/submit")
-    public String submitPesanan(@RequestParam(value = "opsiTambahan", required = false) List<String> opsiTambahan,
-                               @RequestParam("tipePembayaran") String tipePembayaran,
+    public String submitPesanan(@ModelAttribute PesananForm form,
                                HttpSession session,
                                RedirectAttributes redirectAttributes) {
         
-        // DEBUG: Print received opsiTambahan
-        System.out.println("Received Opsi: " + opsiTambahan);
-        if (opsiTambahan == null) {
-            opsiTambahan = new ArrayList<>();
-            System.out.println("OpsiTambahan was null, initialized to empty list");
+        // DEBUG: Print received form DTO
+        System.out.println("FORM DTO RECEIVED: " + form);
+        
+        // MANUAL PARSING: Extract string and convert to List<String>
+        String opsiTambahanStr = form.getOpsiTambahanStr();
+        List<String> opsiTambahan = new ArrayList<>();
+        if (opsiTambahanStr != null && !opsiTambahanStr.isEmpty()) {
+            String[] split = opsiTambahanStr.split(",");
+            for (String s : split) {
+                opsiTambahan.add(s.trim());
+            }
         }
+        TipePembayaran tipePembayaran = form.getTipePembayaran();
+        
+        System.out.println("Raw opsiTambahanStr: '" + opsiTambahanStr + "'");
+        System.out.println("Parsed opsiTambahan: " + opsiTambahan);
+        System.out.println("Extracted tipePembayaran: " + tipePembayaran);
         
         // Validasi login
         if (!HomeController.isMahasiswa(session)) {
@@ -153,20 +189,23 @@ public class PesananController {
         String userName = HomeController.getUserName(session);
         
         try {
-            // Validasi input
-            TipePembayaran tipe = TipePembayaran.valueOf(tipePembayaran.toUpperCase());
+            // Validasi input from DTO
+            if (tipePembayaran == null) {
+                redirectAttributes.addFlashAttribute("error", "Tipe pembayaran harus dipilih");
+                return "redirect:/pesanan/konfirmasi";
+            }
             
             System.out.println("=== STARTING ORDER CREATION PROCESS ===");
             System.out.println("User: " + userName + " (" + userId + ")");
             System.out.println("Selected Options: " + opsiTambahan);
-            System.out.println("Payment Type: " + tipe.getDisplayName());
+            System.out.println("Payment Type: " + tipePembayaran.getDisplayName());
             
             // *** ALL PATTERNS INTEGRATION - CALL SERVICE ***
             // Method ini akan mendemonstrasikan:
             // 1. Decorator Pattern: wrapping pesanan dengan opsi
             // 2. Factory Pattern: creating pembayaran object
             // 3. Singleton Pattern: accessing menu data
-            PesananService.PesananInfo pesananInfo = pesananService.buatPesanan(userId, opsiTambahan, tipe);
+            PesananService.PesananInfo pesananInfo = pesananService.buatPesanan(userId, opsiTambahan, tipePembayaran);
             
             System.out.println("=== ORDER CREATION SUCCESSFUL ===");
             System.out.println("Order ID: " + pesananInfo.getIdPesanan());
