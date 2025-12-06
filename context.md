@@ -6,7 +6,7 @@
 
 **Oleh:**
 - **M. IHSAN RIZQULLAH ADFA**
-- **NIM: 2208107010029**
+- **NPM: 2208107010029**
 
 ---
 
