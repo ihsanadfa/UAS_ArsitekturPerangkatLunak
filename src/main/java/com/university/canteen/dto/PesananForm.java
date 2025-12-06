@@ -2,8 +2,6 @@ package com.university.canteen.dto;
 
 import com.university.canteen.patterns.factory.enums.TipePembayaran;
 import lombok.Data;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Data Transfer Object PesananForm
